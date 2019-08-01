@@ -24,6 +24,7 @@ def main():
 
     dispatcher.add_handler(CommandHandler("help", help_me))
     dispatcher.add_handler(CommandHandler("echo", echo))
+    dispatcher.add_handler(CommandHandler("id", chat_id))
     dispatcher.add_handler(MessageHandler(Filters.command, unkown_command))
 
     HELPER = helper.Helper(dispatcher)
@@ -41,6 +42,13 @@ def echo(bot, updater):
     output_text = input_text.replace("/echo ", '')
     bot.send_message(chat_id=updater.message.chat_id,
                      text=output_text)
+
+def chat_id(bot, updater):
+    """
+    Result: Prints the current chat id.
+    """
+    bot.send_message(chat_id=updater.message.chat_id,
+                     text=updater.message.chat_id)
 
 
 def help_me(bot, updater):

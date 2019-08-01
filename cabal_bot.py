@@ -3,6 +3,7 @@ Runner for the C.A.B.A.L. Telegram Bot.
 """
 from telegram import ParseMode
 from telegram.ext import Updater, MessageHandler, CommandHandler, Filters
+from Commands import ComTime
 from ResourceManager.resource_manager import ResourceManager
 from StringConstants.string_constants import EnglishStrings
 from Utils import file_reader, helper
@@ -25,6 +26,7 @@ def main():
     dispatcher.add_handler(CommandHandler("help", help_me))
     dispatcher.add_handler(CommandHandler("echo", echo))
     dispatcher.add_handler(CommandHandler("id", chat_id))
+    dispatcher.add_handler(CommandHandler("time", time))
     dispatcher.add_handler(MessageHandler(Filters.command, unkown_command))
 
     HELPER = helper.Helper(dispatcher)
@@ -43,12 +45,22 @@ def echo(bot, updater):
     bot.send_message(chat_id=updater.message.chat_id,
                      text=output_text)
 
+
 def chat_id(bot, updater):
     """
     Result: Prints the current chat id.
     """
     bot.send_message(chat_id=updater.message.chat_id,
                      text=updater.message.chat_id)
+
+
+def time(bot, updater):
+    """
+    Result: Prints the current time in preconfigured time zones.
+    """
+    bot.send_message(chat_id=updater.message.chat_id,
+                     text=ComTime().time_message(),
+                     parse_mode=ParseMode.MARKDOWN)
 
 
 def help_me(bot, updater):

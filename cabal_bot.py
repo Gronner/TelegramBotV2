@@ -1,6 +1,7 @@
 """
 Runner for the C.A.B.A.L. Telegram Bot.
 """
+from telegram import ParseMode
 from telegram.ext import Updater, MessageHandler, CommandHandler, Filters
 from ResourceManager.resource_manager import ResourceManager
 from StringConstants.string_constants import EnglishStrings
@@ -48,7 +49,8 @@ def help_me(bot, updater):
     """
     global HELPER
     bot.send_message(chat_id=updater.message.chat_id,
-                     text=HELPER.help_string)
+                     text=HELPER.help_string,
+                     parse_mode=ParseMode.MARKDOWN)
 
 
 def unkown_command(bot, updater):

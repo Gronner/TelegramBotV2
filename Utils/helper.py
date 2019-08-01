@@ -61,6 +61,6 @@ def _create_help_string_from_map(mapping):
     """
     help_string = ""
     for command in mapping:
-        help_string += "{com}: {description}\n".format(com=command,
+        help_string += "*{com}*: {description}\n".format(com=command,
                                                      description=mapping[command])
     return help_string

@@ -7,5 +7,5 @@ def read_token(token_file_path):
     Reads the token from the specified file's first line.
     """
     with open(token_file_path, 'r') as token_file:
-        token = token_file.readline().replace('\n', '')
+        token = token_file.readline().strip()
     return token

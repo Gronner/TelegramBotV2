@@ -116,4 +116,4 @@ dmypy.json
 
 # Custom adds
 bin
-resources/token.conf
+resources

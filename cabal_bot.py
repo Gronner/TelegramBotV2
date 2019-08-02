@@ -24,7 +24,7 @@ def main():
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("help", help_me))
-    dispatcher.add_handler(CommandHandler("echo", echo))
+    dispatcher.add_handler(CommandHandler("echo", echo, pass_args=True))
     dispatcher.add_handler(CommandHandler("id", chat_id))
     dispatcher.add_handler(CommandHandler("time", time))
     dispatcher.add_handler(MessageHandler(Filters.command, unkown_command))
@@ -35,13 +35,14 @@ def main():
     updater.idle()
 
 
-def echo(bot, updater):
+def echo(bot, updater, args):
     """
     Usage: /echo text
     Result: This will print a message containing "text"
     """
     input_text = updater.message.text
-    output_text = input_text.replace("/echo ", '')
+    output_text = " ".join(args)
+
     bot.send_message(chat_id=updater.message.chat_id,
                      text=output_text)
 
@@ -59,7 +60,7 @@ def time(bot, updater):
     Result: Prints the current time in preconfigured time zones.
     """
     bot.send_message(chat_id=updater.message.chat_id,
-                     text=ComTime().time_message(),
+                     text=ComTime(['Europe/Berlin']).time_message(),
                      parse_mode=ParseMode.MARKDOWN)
 
 

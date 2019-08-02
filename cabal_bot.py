@@ -3,7 +3,7 @@ Runner for the C.A.B.A.L. Telegram Bot.
 """
 from telegram import ParseMode
 from telegram.ext import Updater, MessageHandler, CommandHandler, Filters
-from Commands import ComTime
+from Commands import ComTime, get_xkcd
 from ResourceManager.resource_manager import ResourceManager
 from StringConstants.string_constants import EnglishStrings
 from Utils import file_reader, helper
@@ -27,6 +27,7 @@ def main():
     dispatcher.add_handler(CommandHandler("echo", echo, pass_args=True))
     dispatcher.add_handler(CommandHandler("id", chat_id))
     dispatcher.add_handler(CommandHandler("time", time))
+    dispatcher.add_handler(CommandHandler("xkcd", xkcd, pass_args=True))
     dispatcher.add_handler(MessageHandler(Filters.command, unkown_command))
 
     HELPER = helper.Helper(dispatcher)
@@ -62,6 +63,17 @@ def time(bot, updater):
     bot.send_message(chat_id=updater.message.chat_id,
                      text=ComTime(['Europe/Berlin']).time_message(),
                      parse_mode=ParseMode.MARKDOWN)
+
+
+def xkcd(bot, updater, args):
+    """
+    Usage: /xkcd [ number | random ]
+    Result: Either the newest xkcd, the xkcd with id "number" or a random xkcd.
+    """
+    (xkcd_image, xkcd_alt_text) = get_xkcd(args)
+    bot.send_photo(chat_id=updater.message.chat_id,
+                   photo=xkcd_image,
+                   caption=xkcd_alt_text)
 
 
 def help_me(bot, updater):

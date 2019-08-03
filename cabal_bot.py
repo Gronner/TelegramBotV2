@@ -35,9 +35,16 @@ def main():
 
     dispatcher.add_handler(CommandHandler("help", help_me))
     dispatcher.add_handler(CommandHandler("echo", echo, pass_args=True))
-    dispatcher.add_handler(CommandHandler("id", chat_id))
+    dispatcher.add_handler(CommandHandler("id", get_chat_id))
     dispatcher.add_handler(CommandHandler("time", time))
     dispatcher.add_handler(CommandHandler("xkcd", xkcd, pass_args=True))
+    dispatcher.add_handler(CommandHandler("remind", set_timer,
+                                          pass_args=True,
+                                          pass_job_queue=True,
+                                          pass_chat_data=True))
+    dispatcher.add_handler(CommandHandler("unremind", unset_timer,
+                                          pass_args=True,
+                                          pass_chat_data=True))
 
     dispatcher.add_handler(CommandHandler("vip",
                                           vip,
@@ -80,7 +87,7 @@ def main():
 
 def add_chat(bot, updater, args):
     """
-    Usage: /accChat chatId
+    Usage: /accChat <chatId>
     Result: Adds the chat with "chatId" to the extended functions group.
     """
     if len(args) != 1 or not args[0].lstrip('-').isdigit():
@@ -92,9 +99,17 @@ def add_chat(bot, updater, args):
                          text=EnglishStrings.SUCCESSFUL_ADD)
 
 
+def get_chat_id(bot, updater):
+    """
+    Result: Prints the current chat id.
+    """
+    bot.send_message(chat_id=updater.message.chat_id,
+                     text=updater.message.chat_id)
+
+
 def echo(bot, updater, args):
     """
-    Usage: /echo text
+    Usage: /echo <text>
     Result: This will print a message containing "text"
     """
     output_text = " ".join(args)
@@ -103,12 +118,40 @@ def echo(bot, updater, args):
                      text=output_text)
 
 
-def chat_id(bot, updater):
+def set_timer(bot, updater, args, job_queue, chat_data):
     """
-    Result: Prints the current chat id.
+    Usage: /remind <id> <hours> <minutes> <text>
+    Result: This will print a reminder, if specified with "text" as output,
+    after hours:minutes have passed.
     """
-    bot.send_message(chat_id=updater.message.chat_id,
-                     text=updater.message.chat_id)
+    print(len(args))
+    if len(args) < 4 or not args[1].isdigit() or not args[2].isdigit():
+        bot.send_message(chat_id=updater.message.chat_id,
+                         text="Usage: /remind <id> <hours> <minutes> [<text>]")
+        return
+
+    job_context = {}
+    timer_id = args[0]
+    hours = int(args[1])
+    minutes = int(args[2])
+    job_context['text'] = ' '.join(args[3:])
+    job_context['chat'] = updater.message.chat_id
+
+    chat_data['jobs' + timer_id] = job_queue.run_once(_print_reminder,
+                                                      hours * 3600 + minutes * 60,
+                                                      context=job_context)
+
+    updater.message.reply_text("Timer was set successfully!")
+
+
+def _print_reminder(bot, job):
+    """
+    Responsible for executing the reminder job.
+    """
+    chat_id = job.context['chat']
+    output_text = job.context['text']
+    bot.send_message(chat_id=chat_id,
+                     text=output_text)
 
 
 def time(bot, updater):
@@ -118,6 +161,25 @@ def time(bot, updater):
     bot.send_message(chat_id=updater.message.chat_id,
                      text=ComTime(['Europe/Berlin']).time_message(),
                      parse_mode=ParseMode.MARKDOWN)
+
+
+def unset_timer(bot, updater, args, chat_data):
+    """
+    Usage: /unremind <id>
+    Result: Will stop the reminder with id "id" from being executed."
+    """
+    if not args:
+        bot.send_message(chat_id=updater.message.chat_id,
+                         text="Usage: /unremind <id>, id must be a number")
+        return
+    job_id = "jobs" + args[0]
+    if job_id  not in chat_data:
+        bot.send_message.reply_text("No reminder of that id")
+        return
+    job = chat_data[job_id]
+    job.schedule_removal()
+    del chat_data[job_id]
+    bot.send_message.reply_text("Reminder disabled")
 
 
 def vip(bot, updater):
@@ -130,7 +192,7 @@ def vip(bot, updater):
 
 def xkcd(bot, updater, args):
     """
-    Usage: /xkcd [ number | random ]
+    Usage: /xkcd [ <number> | random ]
     Result: Either the newest xkcd, the xkcd with id "number" or a random xkcd.
     """
     (xkcd_image, xkcd_alt_text) = ComXkcd().get_xkcd(args)

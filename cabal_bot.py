@@ -51,7 +51,7 @@ def main():
                                           filters=EXPANDED_FUNCTION_ACCESS),
                            group=1)
 
-    dispatcher.add_handler(CommandHandler("addChat",
+    dispatcher.add_handler(CommandHandler("addchat",
                                           add_chat,
                                           pass_args=True,
                                           filters=admin_only),
@@ -87,7 +87,7 @@ def main():
 
 def add_chat(bot, updater, args):
     """
-    Usage: /accChat <chatId>
+    Usage: /addchat <chatId>
     Result: Adds the chat with "chatId" to the extended functions group.
     """
     if len(args) != 1 or not args[0].lstrip('-').isdigit():
@@ -192,7 +192,7 @@ def vip(bot, updater):
 
 def xkcd(bot, updater, args):
     """
-    Usage: /xkcd [ <number> | random ]
+    Usage: /xkcd \\[ <number> | random ]
     Result: Either the newest xkcd, the xkcd with id "number" or a random xkcd.
     """
     (xkcd_image, xkcd_alt_text) = ComXkcd().get_xkcd(args)

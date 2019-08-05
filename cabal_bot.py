@@ -232,7 +232,7 @@ def unkown_command(bot, updater):
     Handles unkown commands send to the bot.
     """
     bot.send_message(chat_id=updater.message.chat_id,
-                     text=EnglishStrings.UNKOWN_COMMAND + "0")
+                     text=EnglishStrings.UNKOWN_COMMAND)
 
 
 def skip(bot, updater):
